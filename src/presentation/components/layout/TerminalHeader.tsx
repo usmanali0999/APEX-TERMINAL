@@ -17,6 +17,7 @@ const viewLabels: Record<WorkspaceView, string> = {
 export function TerminalHeader() {
   const router = useRouter();
   const tick = useMarketStore((state) => state.tick);
+  const isLiveConnected = useMarketStore((state) => state.isLiveConnected);
   const activeView = useWorkspaceStore((state) => state.activeView);
   const toggleCommandPalette = useWorkspaceStore(
     (state) => state.toggleCommandPalette
@@ -27,18 +28,17 @@ export function TerminalHeader() {
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
-  const timer = setInterval(() => {
-    setTime(new Date());
-  }, 1000);
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
 
-  // Set initial time after mount (avoids sync setState warning)
-  const initialTimer = setTimeout(() => setTime(new Date()), 0);
+    const initialTimer = setTimeout(() => setTime(new Date()), 0);
 
-  return () => {
-    clearInterval(timer);
-    clearTimeout(initialTimer);
-  };
-}, []);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(initialTimer);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -53,8 +53,14 @@ export function TerminalHeader() {
             <span className="text-cyan-400 font-bold tracking-wider">
               APEXPULSE TERMINAL
             </span>
-            <span className="text-[10px] px-2 py-1 rounded bg-gray-900 text-gray-400 border border-gray-800">
-              LIVE SIM
+            <span
+              className={`text-[10px] px-2 py-1 rounded border ${
+                isLiveConnected
+                  ? "bg-green-900/30 text-green-400 border-green-800"
+                  : "bg-gray-900 text-gray-400 border-gray-800"
+              }`}
+            >
+              {isLiveConnected ? "● BINANCE LIVE" : "◌ SIM MODE"}
             </span>
             <button
               onClick={toggleCommandPalette}
@@ -87,9 +93,17 @@ export function TerminalHeader() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 font-mono text-xs">
           <div className="rounded-lg border border-gray-900 bg-gray-950 px-3 py-2">
             <div className="text-gray-500">Feed</div>
-            <div className="text-green-400 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-              Streaming
+            <div
+              className={`flex items-center gap-2 ${
+                isLiveConnected ? "text-green-400" : "text-yellow-400"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full animate-pulse ${
+                  isLiveConnected ? "bg-green-400" : "bg-yellow-400"
+                }`}
+              />
+              {isLiveConnected ? "Binance" : "Simulation"}
             </div>
           </div>
 

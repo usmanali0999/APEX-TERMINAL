@@ -18,34 +18,56 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="hidden lg:flex w-16 flex-col items-center gap-2 border-r border-gray-900 bg-black/95 py-4">
-      <button
-        onClick={toggleCommandPalette}
-        className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center justify-center hover:bg-cyan-500/20 transition-all"
-        title="Command Palette (Ctrl+K)"
-      >
-        ⌘
-      </button>
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-16 flex-col items-center gap-2 border-r border-gray-900 bg-black/95 py-4">
+        <button
+          onClick={toggleCommandPalette}
+          className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center justify-center hover:bg-cyan-500/20 transition-all"
+          title="Command Palette (Ctrl+K)"
+        >
+          ⌘
+        </button>
 
-      <div className="w-8 h-px bg-gray-900 my-2" />
+        <div className="w-8 h-px bg-gray-900 my-2" />
 
-      {items.map((item) => {
-        const active = activeView === item.key;
-        return (
-          <button
-            key={item.key}
-            onClick={() => setActiveView(item.key)}
-            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all text-lg ${
-              active
-                ? "bg-cyan-500/10 border border-cyan-500/40 text-cyan-300"
-                : "text-gray-500 hover:bg-gray-900 hover:text-white"
-            }`}
-            title={item.label}
-          >
-            {item.icon}
-          </button>
-        );
-      })}
-    </aside>
+        {items.map((item) => {
+          const active = activeView === item.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => setActiveView(item.key)}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all text-lg ${
+                active
+                  ? "bg-cyan-500/10 border border-cyan-500/40 text-cyan-300"
+                  : "text-gray-500 hover:bg-gray-900 hover:text-white"
+              }`}
+              title={item.label}
+            >
+              {item.icon}
+            </button>
+          );
+        })}
+      </aside>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-black/95 backdrop-blur border-t border-gray-900 flex justify-around py-2">
+        {items.map((item) => {
+          const active = activeView === item.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => setActiveView(item.key)}
+              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-all ${
+                active ? "text-cyan-300" : "text-gray-500"
+              }`}
+            >
+              <span className="text-lg">{item.icon}</span>
+              <span className="text-[9px] font-mono">{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </>
   );
 }

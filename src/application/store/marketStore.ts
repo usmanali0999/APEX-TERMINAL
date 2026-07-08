@@ -1,11 +1,6 @@
 import { create } from "zustand";
-import {
-  MarketTick,
-  OrderBook,
-  Candle,
-  TradePrint,
-} from "@/domain/models/types";
-import { marketEngine } from "@/infrastructure/market-data/tickGenerator";
+import { MarketTick, OrderBook, Candle, TradePrint } from "@/domain/models/types";
+import { binanceMarketEngine } from "@/infrastructure/market-data/binanceAdapter";
 
 interface MarketState {
   activeSymbol: string;
@@ -16,42 +11,50 @@ interface MarketState {
   candles: Candle[];
   trades: TradePrint[];
   isStarted: boolean;
+  isLiveConnected: boolean;
   start: () => void;
   setActiveSymbol: (symbol: string) => void;
 }
 
 export const useMarketStore = create<MarketState>((set, get) => ({
-  activeSymbol: marketEngine.getActiveSymbol(),
-  allSymbols: marketEngine.getAllSymbols(),
+  activeSymbol: binanceMarketEngine.getActiveSymbol(),
+  allSymbols: binanceMarketEngine.getAllSymbols(),
   tick: null,
-  allTicks: marketEngine.getAllTicks(),
+  allTicks: binanceMarketEngine.getAllTicks(),
   book: null,
-  candles: marketEngine.getSnapshot(marketEngine.getActiveSymbol())?.candles ?? [],
+  candles:
+    binanceMarketEngine.getSnapshot(binanceMarketEngine.getActiveSymbol())
+      ?.candles ?? [],
   trades: [],
   isStarted: false,
+  isLiveConnected: false,
 
   start: () => {
     if (get().isStarted) return;
 
-    marketEngine.subscribe((tick, book, candles, trade) => {
+    binanceMarketEngine.subscribe((tick, book, candles, trade) => {
       set((state) => ({
         tick,
         book,
         candles,
-        allTicks: marketEngine.getAllTicks(),
-        trades: trade
-          ? [trade, ...state.trades].slice(0, 30)
-          : state.trades,
+        allTicks: binanceMarketEngine.getAllTicks(),
+        isLiveConnected: binanceMarketEngine.getConnectionStatus(),
+        trades: trade ? [trade, ...state.trades].slice(0, 30) : state.trades,
       }));
     });
 
-    marketEngine.start();
+    binanceMarketEngine.start();
     set({ isStarted: true });
+
+    // Check connection status every 3s
+    setInterval(() => {
+      set({ isLiveConnected: binanceMarketEngine.getConnectionStatus() });
+    }, 3000);
   },
 
   setActiveSymbol: (symbol) => {
-    marketEngine.setActiveSymbol(symbol);
-    const snap = marketEngine.getSnapshot(symbol);
+    binanceMarketEngine.setActiveSymbol(symbol);
+    const snap = binanceMarketEngine.getSnapshot(symbol);
     if (snap) {
       set({
         activeSymbol: symbol,
