@@ -24,21 +24,21 @@ export function OrderPanel() {
       ? price * (1 - 1 / leverage)
       : price * (1 + 1 / leverage);
 
-  const handleOrder = () => {
-    if (!tick) return;
+  const handleOrder = async () => {
+  if (!tick) return;
 
-    const result = executeOrder(
-      "BTC/USD",
-      side,
-      tick.price,
-      parseFloat(quantity),
-      leverage
-    );
+  const result = await executeOrder(
+    "BTC/USD",
+    side,
+    tick.price,
+    parseFloat(quantity),
+    leverage
+  );
 
-    setMessage({ text: result.message, success: result.success });
+  setMessage({ text: result.message, success: result.success });
 
-    setTimeout(() => setMessage(null), 3000);
-  };
+  setTimeout(() => setMessage(null), 3000);
+};
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 font-mono space-y-4">

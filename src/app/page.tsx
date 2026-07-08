@@ -17,16 +17,29 @@ import { RecentTrades } from "@/presentation/components/trading/RecentTrades";
 import { BacktestStudio } from "@/presentation/components/algo/BacktestStudio";
 import { RiskDashboard } from "@/presentation/components/analytics/RiskDashboard";
 import { SystemLogs } from "@/presentation/components/system/SystemLogs";
+import { usePortfolioStore } from "@/application/store/portfolioStore";
+import { useAuthStore } from "@/application/store/authStore";
 
 export default function Home() {
   const start = useMarketStore((s) => s.start);
   const activeView = useWorkspaceStore((s) => s.activeView);
   const addLog = useWorkspaceStore((s) => s.addLog);
 
-  useEffect(() => {
+const loadFromDb = usePortfolioStore((s) => s.loadFromDb);
+const checkAuth = useAuthStore((s) => s.checkAuth);
+const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+useEffect(() => {
+  checkAuth();
+}, [checkAuth]);
+
+useEffect(() => {
+  if (isAuthenticated) {
     start();
+    loadFromDb();
     addLog("INFO", "Market engine connected to trading workspace.");
-  }, [start, addLog]);
+  }
+}, [isAuthenticated, start, addLog, loadFromDb]);
 
   return (
     <main className="min-h-screen bg-black text-white flex">

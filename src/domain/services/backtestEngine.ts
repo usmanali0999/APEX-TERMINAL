@@ -5,6 +5,13 @@ import {
   Candle,
   EquityCurvePoint,
 } from "@/domain/models/types";
+import {
+  calculateReturns,
+  calculateSharpeRatio,
+  calculateSortinoRatio,
+  calculateCAGR,
+  calculateTradeMetrics,
+} from "@/domain/services/performanceMetrics";
 import { calculateEMA, calculateMaxDrawdown } from "@/domain/services/tradingMath";
 
 type OpenPosition = {
@@ -153,6 +160,21 @@ export function runEmaCrossoverBacktest(
     equityCurve.map((point) => point.equity)
   );
 
+  // Advanced Performance Metrics
+  const returns = calculateReturns(equityCurve);
+  const sharpeRatio = calculateSharpeRatio(returns);
+  const sortinoRatio = calculateSortinoRatio(returns);
+  const cagr =
+    equityCurve.length > 1
+      ? calculateCAGR(
+          config.initialCapital,
+          capital,
+          equityCurve[0].timestamp,
+          equityCurve[equityCurve.length - 1].timestamp
+        )
+      : 0;
+  const tradeMetrics = calculateTradeMetrics(trades);
+
   return {
     config,
     initialCapital: config.initialCapital,
@@ -167,5 +189,14 @@ export function runEmaCrossoverBacktest(
     trades,
     equityCurve,
     executionTimeMs: Number((performance.now() - startedAt).toFixed(2)),
+    sharpeRatio: Number(sharpeRatio.toFixed(3)),
+    sortinoRatio: Number(sortinoRatio.toFixed(3)),
+    cagr: Number(cagr.toFixed(2)),
+    profitFactor: tradeMetrics.profitFactor,
+    averageWin: tradeMetrics.averageWin,
+    averageLoss: tradeMetrics.averageLoss,
+    expectancy: tradeMetrics.expectancy,
+    largestWin: tradeMetrics.largestWin,
+    largestLoss: tradeMetrics.largestLoss,
   };
 }

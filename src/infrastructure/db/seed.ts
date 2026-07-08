@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import bcrypt from "bcryptjs";
 import { db } from "./client";
 import * as schema from "./schema";
 
@@ -8,20 +9,27 @@ async function seed() {
   const sqlite = new Database("./apex-terminal.db");
 
   sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS users (
+    DROP TABLE IF EXISTS users;
+    DROP TABLE IF EXISTS portfolios;
+    DROP TABLE IF EXISTS positions;
+    DROP TABLE IF EXISTS trade_logs;
+    DROP TABLE IF EXISTS strategies;
+
+    CREATE TABLE users (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
       name TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
       created_at INTEGER NOT NULL
     );
-    CREATE TABLE IF NOT EXISTS portfolios (
+    CREATE TABLE portfolios (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       balance REAL NOT NULL DEFAULT 100000,
       total_pnl REAL NOT NULL DEFAULT 0,
       updated_at INTEGER NOT NULL
     );
-    CREATE TABLE IF NOT EXISTS positions (
+    CREATE TABLE positions (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       symbol TEXT NOT NULL,
@@ -35,7 +43,7 @@ async function seed() {
       opened_at INTEGER NOT NULL,
       closed_at INTEGER
     );
-    CREATE TABLE IF NOT EXISTS trade_logs (
+    CREATE TABLE trade_logs (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       position_id TEXT,
@@ -47,7 +55,7 @@ async function seed() {
       pnl REAL,
       timestamp INTEGER NOT NULL
     );
-    CREATE TABLE IF NOT EXISTS strategies (
+    CREATE TABLE strategies (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       name TEXT NOT NULL,
@@ -64,17 +72,13 @@ async function seed() {
 
   const now = Date.now();
   const userId = "user-apex-principal";
-
-  await db.delete(schema.tradeLogsTable);
-  await db.delete(schema.positionsTable);
-  await db.delete(schema.strategiesTable);
-  await db.delete(schema.portfoliosTable);
-  await db.delete(schema.usersTable);
+  const passwordHash = await bcrypt.hash("apex123", 10);
 
   await db.insert(schema.usersTable).values({
     id: userId,
     email: "principal@apexpulse.io",
     name: "Principal Quant",
+    passwordHash,
     createdAt: now,
   });
 
@@ -111,7 +115,9 @@ async function seed() {
     },
   ]);
 
-  console.log("✅ Database seeded successfully with Principal Quant demo data!");
+  console.log("✅ Database seeded successfully!");
+  console.log("📧 Login: principal@apexpulse.io");
+  console.log("🔑 Password: apex123");
   process.exit(0);
 }
 

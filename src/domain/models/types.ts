@@ -101,4 +101,13 @@ export interface BacktestResult {
   trades: BacktestTrade[];
   equityCurve: EquityCurvePoint[];
   executionTimeMs: number;
+  sharpeRatio: number;
+  sortinoRatio: number;
+  cagr: number;
+  profitFactor: number;
+  averageWin: number;
+  averageLoss: number;
+  expectancy: number;
+  largestWin: number;
+  largestLoss: number;
 }

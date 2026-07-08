@@ -61,7 +61,7 @@ export function BacktestStudio() {
         "ALGO",
         `Backtest complete • Return ${output.totalReturnPercentage.toFixed(
           2
-        )}% • Trades ${output.totalTrades} • DD ${output.maxDrawdownPercentage.toFixed(2)}%`
+        )}% • Sharpe ${output.sharpeRatio.toFixed(2)} • DD ${output.maxDrawdownPercentage.toFixed(2)}%`
       );
     } catch (error) {
       addLog(
@@ -144,13 +144,124 @@ export function BacktestStudio() {
 
       {result ? (
         <>
+          {/* Basic Metrics */}
           <div className="grid grid-cols-2 xl:grid-cols-6 gap-4">
-            <MetricCard label="Final Capital" value={`$${result.finalCapital.toLocaleString()}`} />
-            <MetricCard label="Return %" value={`${result.totalReturnPercentage.toFixed(2)}%`} />
-            <MetricCard label="Trades" value={String(result.totalTrades)} />
-            <MetricCard label="Win Rate" value={`${result.winRate.toFixed(2)}%`} />
-            <MetricCard label="Max DD" value={`${result.maxDrawdownPercentage.toFixed(2)}%`} />
-            <MetricCard label="Exec Time" value={`${result.executionTimeMs.toFixed(2)} ms`} />
+            <BasicMetricCard
+              label="Final Capital"
+              value={`$${result.finalCapital.toLocaleString()}`}
+            />
+            <BasicMetricCard
+              label="Return %"
+              value={`${result.totalReturnPercentage.toFixed(2)}%`}
+            />
+            <BasicMetricCard label="Trades" value={String(result.totalTrades)} />
+            <BasicMetricCard
+              label="Win Rate"
+              value={`${result.winRate.toFixed(2)}%`}
+            />
+            <BasicMetricCard
+              label="Max DD"
+              value={`${result.maxDrawdownPercentage.toFixed(2)}%`}
+            />
+            <BasicMetricCard
+              label="Exec Time"
+              value={`${result.executionTimeMs.toFixed(2)} ms`}
+            />
+          </div>
+
+          {/* Advanced Performance Metrics */}
+          <div className="rounded-xl border border-gray-900 bg-gray-950 p-4">
+            <div className="text-sm text-gray-400 font-mono mb-4">
+              📊 Advanced Performance Metrics (Institutional-Grade)
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+              <MetricCard
+                label="Sharpe Ratio"
+                value={result.sharpeRatio.toFixed(3)}
+                hint={
+                  result.sharpeRatio > 1
+                    ? "Excellent"
+                    : result.sharpeRatio > 0
+                    ? "Positive"
+                    : "Poor"
+                }
+                color={
+                  result.sharpeRatio > 1
+                    ? "text-green-400"
+                    : result.sharpeRatio > 0
+                    ? "text-cyan-400"
+                    : "text-red-400"
+                }
+              />
+              <MetricCard
+                label="Sortino Ratio"
+                value={result.sortinoRatio.toFixed(3)}
+                hint={
+                  result.sortinoRatio > 1
+                    ? "Excellent"
+                    : result.sortinoRatio > 0
+                    ? "Positive"
+                    : "Poor"
+                }
+                color={
+                  result.sortinoRatio > 1
+                    ? "text-green-400"
+                    : result.sortinoRatio > 0
+                    ? "text-cyan-400"
+                    : "text-red-400"
+                }
+              />
+              <MetricCard
+                label="CAGR"
+                value={`${result.cagr.toFixed(2)}%`}
+                hint="Annualized"
+                color={result.cagr >= 0 ? "text-green-400" : "text-red-400"}
+              />
+              <MetricCard
+                label="Profit Factor"
+                value={result.profitFactor.toFixed(2)}
+                hint={result.profitFactor >= 1.5 ? "Strong" : "Weak"}
+                color={
+                  result.profitFactor >= 1.5
+                    ? "text-green-400"
+                    : "text-yellow-400"
+                }
+              />
+              <MetricCard
+                label="Expectancy"
+                value={`$${result.expectancy.toFixed(2)}`}
+                hint="Per Trade"
+                color={
+                  result.expectancy >= 0 ? "text-green-400" : "text-red-400"
+                }
+              />
+              <MetricCard
+                label="Avg Win"
+                value={`$${result.averageWin.toFixed(2)}`}
+                color="text-green-400"
+              />
+              <MetricCard
+                label="Avg Loss"
+                value={`$${result.averageLoss.toFixed(2)}`}
+                color="text-red-400"
+              />
+              <MetricCard
+                label="Largest Win"
+                value={`$${result.largestWin.toFixed(2)}`}
+                color="text-green-400"
+              />
+              <MetricCard
+                label="Largest Loss"
+                value={`$${result.largestLoss.toFixed(2)}`}
+                color="text-red-400"
+              />
+              <MetricCard
+                label="Win / Loss"
+                value={`${result.winningTrades} / ${result.losingTrades}`}
+                color="text-cyan-400"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -237,14 +348,22 @@ export function BacktestStudio() {
                       <tr key={trade.id} className="border-b border-gray-900/60">
                         <td
                           className={`py-2 ${
-                            trade.side === "LONG" ? "text-green-400" : "text-red-400"
+                            trade.side === "LONG"
+                              ? "text-green-400"
+                              : "text-red-400"
                           }`}
                         >
                           {trade.side}
                         </td>
-                        <td className="text-right">${trade.entryPrice.toFixed(2)}</td>
-                        <td className="text-right">${trade.exitPrice.toFixed(2)}</td>
-                        <td className="text-right">{trade.quantity.toFixed(4)}</td>
+                        <td className="text-right">
+                          ${trade.entryPrice.toFixed(2)}
+                        </td>
+                        <td className="text-right">
+                          ${trade.exitPrice.toFixed(2)}
+                        </td>
+                        <td className="text-right">
+                          {trade.quantity.toFixed(4)}
+                        </td>
                         <td
                           className={`text-right ${
                             trade.pnl >= 0 ? "text-green-400" : "text-red-400"
@@ -252,7 +371,9 @@ export function BacktestStudio() {
                         >
                           {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
                         </td>
-                        <td className="text-right text-gray-400">{trade.reason}</td>
+                        <td className="text-right text-gray-400">
+                          {trade.reason}
+                        </td>
                       </tr>
                     ))}
                 </tbody>
@@ -263,7 +384,8 @@ export function BacktestStudio() {
       ) : (
         <div className="rounded-xl border border-dashed border-gray-800 bg-gray-950 p-8 text-center">
           <div className="text-gray-400 font-mono">
-            Configure parameters and click <span className="text-cyan-300">Run Quant Backtest</span>.
+            Configure parameters and click{" "}
+            <span className="text-cyan-300">Run Quant Backtest</span>.
           </div>
         </div>
       )}
@@ -271,13 +393,39 @@ export function BacktestStudio() {
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: string }) {
+function BasicMetricCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-gray-900 bg-gray-950 p-4">
       <div className="text-xs text-gray-500 font-mono">{label}</div>
       <div className="text-lg text-white font-semibold font-mono mt-2">
         {value}
       </div>
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  hint,
+  color = "text-white",
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  color?: string;
+}) {
+  return (
+    <div className="bg-black border border-gray-900 rounded-lg p-3">
+      <div className="text-[10px] text-gray-500 font-mono uppercase">
+        {label}
+      </div>
+      <div className={`text-base font-bold font-mono mt-1 ${color}`}>
+        {value}
+      </div>
+      {hint && (
+        <div className="text-[10px] text-gray-600 font-mono mt-1">{hint}</div>
+      )}
     </div>
   );
 }
