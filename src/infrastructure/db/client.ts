@@ -1,9 +1,12 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
-const sqlite = new Database("./apex-terminal.db");
-sqlite.pragma("journal_mode = WAL");
+const connectionString = process.env.DATABASE_URL!;
 
-export const db = drizzle(sqlite, { schema });
+const queryClient = postgres(connectionString, {
+  prepare: false,
+});
+
+export const db = drizzle(queryClient, { schema });
 export { schema };

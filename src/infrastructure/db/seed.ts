@@ -1,37 +1,50 @@
-import Database from "better-sqlite3";
+import "dotenv/config";
+import postgres from "postgres";
 import bcrypt from "bcryptjs";
 import { db } from "./client";
 import * as schema from "./schema";
 
 async function seed() {
-  console.log("🌱 Seeding ApexPulse Terminal Database...");
+  console.log("🌱 Seeding ApexPulse Terminal Database (Supabase PostgreSQL)...");
 
-  const sqlite = new Database("./apex-terminal.db");
+  const sql = postgres(process.env.DATABASE_URL!, {
+    prepare: false,
+  });
 
-  sqlite.exec(`
-    DROP TABLE IF EXISTS users;
-    DROP TABLE IF EXISTS portfolios;
-    DROP TABLE IF EXISTS positions;
-    DROP TABLE IF EXISTS trade_logs;
-    DROP TABLE IF EXISTS strategies;
+  // Drop existing tables
+  await sql`DROP TABLE IF EXISTS trade_logs CASCADE`;
+  await sql`DROP TABLE IF EXISTS positions CASCADE`;
+  await sql`DROP TABLE IF EXISTS strategies CASCADE`;
+  await sql`DROP TABLE IF EXISTS portfolios CASCADE`;
+  await sql`DROP TABLE IF EXISTS users CASCADE`;
 
+  // Create users table
+  await sql`
     CREATE TABLE users (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
       name TEXT NOT NULL,
       password_hash TEXT NOT NULL,
-      created_at INTEGER NOT NULL
-    );
+      created_at BIGINT NOT NULL
+    )
+  `;
+
+  // Create portfolios table
+  await sql`
     CREATE TABLE portfolios (
       id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
+      user_id TEXT NOT NULL REFERENCES users(id),
       balance REAL NOT NULL DEFAULT 100000,
       total_pnl REAL NOT NULL DEFAULT 0,
-      updated_at INTEGER NOT NULL
-    );
+      updated_at BIGINT NOT NULL
+    )
+  `;
+
+  // Create positions table
+  await sql`
     CREATE TABLE positions (
       id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
+      user_id TEXT NOT NULL REFERENCES users(id),
       symbol TEXT NOT NULL,
       side TEXT NOT NULL,
       entry_price REAL NOT NULL,
@@ -40,12 +53,16 @@ async function seed() {
       liquidation_price REAL NOT NULL,
       status TEXT NOT NULL DEFAULT 'OPEN',
       realized_pnl REAL NOT NULL DEFAULT 0,
-      opened_at INTEGER NOT NULL,
-      closed_at INTEGER
-    );
+      opened_at BIGINT NOT NULL,
+      closed_at BIGINT
+    )
+  `;
+
+  // Create trade_logs table
+  await sql`
     CREATE TABLE trade_logs (
       id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
+      user_id TEXT NOT NULL REFERENCES users(id),
       position_id TEXT,
       action TEXT NOT NULL,
       symbol TEXT NOT NULL,
@@ -53,22 +70,28 @@ async function seed() {
       price REAL NOT NULL,
       quantity REAL NOT NULL,
       pnl REAL,
-      timestamp INTEGER NOT NULL
-    );
+      timestamp BIGINT NOT NULL
+    )
+  `;
+
+  // Create strategies table
+  await sql`
     CREATE TABLE strategies (
       id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
+      user_id TEXT NOT NULL REFERENCES users(id),
       name TEXT NOT NULL,
       symbol TEXT NOT NULL,
       fast_period INTEGER NOT NULL,
       slow_period INTEGER NOT NULL,
       initial_capital REAL NOT NULL,
       order_size_percent REAL NOT NULL,
-      created_at INTEGER NOT NULL
-    );
-  `);
+      created_at BIGINT NOT NULL
+    )
+  `;
 
-  sqlite.close();
+  await sql.end();
+
+  console.log("✅ Tables created!");
 
   const now = Date.now();
   const userId = "user-apex-principal";
@@ -102,7 +125,7 @@ async function seed() {
       orderSizePercent: 20,
       createdAt: now,
     },
-    {
+        {
       id: "strat-ema-slow",
       userId,
       name: "EMA 20/50 Trend",
@@ -118,6 +141,7 @@ async function seed() {
   console.log("✅ Database seeded successfully!");
   console.log("📧 Login: principal@apexpulse.io");
   console.log("🔑 Password: apex123");
+
   process.exit(0);
 }
 

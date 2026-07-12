@@ -1,56 +1,56 @@
-import { sqliteTable, text, real, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, real, integer, bigint } from "drizzle-orm/pg-core";
 
-export const usersTable = sqliteTable("users", {
+export const usersTable = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull(),
-  createdAt: integer("created_at").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
-export const portfoliosTable = sqliteTable("portfolios", {
+export const portfoliosTable = pgTable("portfolios", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id),
   balance: real("balance").notNull().default(100000),
   totalPnl: real("total_pnl").notNull().default(0),
-  updatedAt: integer("updated_at").notNull(),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
 });
 
-export const positionsTable = sqliteTable("positions", {
+export const positionsTable = pgTable("positions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id),
   symbol: text("symbol").notNull(),
-  side: text("side").notNull(), // LONG or SHORT
+  side: text("side").notNull(),
   entryPrice: real("entry_price").notNull(),
   quantity: real("quantity").notNull(),
   leverage: integer("leverage").notNull().default(1),
   liquidationPrice: real("liquidation_price").notNull(),
-  status: text("status").notNull().default("OPEN"), // OPEN or CLOSED
+  status: text("status").notNull().default("OPEN"),
   realizedPnl: real("realized_pnl").notNull().default(0),
-  openedAt: integer("opened_at").notNull(),
-  closedAt: integer("closed_at"),
+  openedAt: bigint("opened_at", { mode: "number" }).notNull(),
+  closedAt: bigint("closed_at", { mode: "number" }),
 });
 
-export const tradeLogsTable = sqliteTable("trade_logs", {
+export const tradeLogsTable = pgTable("trade_logs", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id),
-  positionId: text("position_id").references(() => positionsTable.id),
-  action: text("action").notNull(), // OPEN, CLOSE
+  positionId: text("position_id"),
+  action: text("action").notNull(),
   symbol: text("symbol").notNull(),
   side: text("side").notNull(),
   price: real("price").notNull(),
   quantity: real("quantity").notNull(),
   pnl: real("pnl"),
-  timestamp: integer("timestamp").notNull(),
+  timestamp: bigint("timestamp", { mode: "number" }).notNull(),
 });
 
-export const strategiesTable = sqliteTable("strategies", {
+export const strategiesTable = pgTable("strategies", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -61,5 +61,5 @@ export const strategiesTable = sqliteTable("strategies", {
   slowPeriod: integer("slow_period").notNull(),
   initialCapital: real("initial_capital").notNull(),
   orderSizePercent: real("order_size_percent").notNull(),
-  createdAt: integer("created_at").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
