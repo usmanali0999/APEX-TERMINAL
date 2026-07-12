@@ -15,6 +15,7 @@ A production-ready trading terminal built with Next.js 15, TypeScript, and Clean
 ## 🎯 Key Features
 
 ### 📈 Trading Desk
+
 - **Real-time Binance WebSocket** integration (BTC, ETH, SOL live prices)
 - Multi-symbol ticker tape with instant symbol switching
 - Live candlestick chart with EMA 9 / EMA 21 overlays
@@ -25,11 +26,13 @@ A production-ready trading terminal built with Next.js 15, TypeScript, and Clean
 - Recent trades feed (tape reader)
 
 ### 🤖 Algo Studio (Backtesting Engine)
+
 - **EMA Crossover Strategy** with configurable parameters
 - Interactive equity curve & drawdown visualization
 - Trade-by-trade breakdown with entry/exit signals
 
 ### 📊 Institutional Performance Metrics
+
 - **Sharpe Ratio** (risk-adjusted return)
 - **Sortino Ratio** (downside risk)
 - **CAGR** (Compound Annual Growth Rate)
@@ -39,22 +42,26 @@ A production-ready trading terminal built with Next.js 15, TypeScript, and Clean
 - Max Drawdown
 
 ### 🛡️ Risk Dashboard
+
 - Total equity, margin utilization, VaR (95% confidence)
 - Position allocation pie chart
 - Real-time margin utilization gauge (green/yellow/red states)
 
 ### 🔐 Authentication
+
 - JWT-based session management (HTTP-only cookies)
 - Bcrypt password hashing
 - Multi-user support with isolated portfolios
 - Protected routes via Next.js middleware
 
 ### 💾 Trade Persistence
+
 - SQLite database with Drizzle ORM
 - Positions, trade logs, portfolios persisted
 - Full transaction history
 
 ### 💻 Developer Experience
+
 - Command Palette (`Ctrl+K` / `Cmd+K`)
 - System logs panel with color-coded severity
 - Mobile-responsive with bottom navigation
@@ -63,26 +70,27 @@ A production-ready trading terminal built with Next.js 15, TypeScript, and Clean
 ---
 
 ## 🏗️ Architecture — Clean Architecture / DDD
+
 src/
-├── domain/              # Pure business logic (100% testable)
-│   ├── models/          # Type definitions
-│   └── services/        # Trading math, backtest engine, performance metrics
+├── domain/ # Pure business logic (100% testable)
+│ ├── models/ # Type definitions
+│ └── services/ # Trading math, backtest engine, performance metrics
 │
-├── infrastructure/      # External adapters
-│   ├── db/              # Drizzle schema, repositories
-│   ├── auth/            # JWT signing, verification
-│   └── market-data/     # Binance WebSocket adapter
+├── infrastructure/ # External adapters
+│ ├── db/ # Drizzle schema, repositories
+│ ├── auth/ # JWT signing, verification
+│ └── market-data/ # Binance WebSocket adapter
 │
-├── application/         # State orchestration
-│   └── store/           # Zustand stores (market, portfolio, auth, workspace)
+├── application/ # State orchestration
+│ └── store/ # Zustand stores (market, portfolio, auth, workspace)
 │
-└── presentation/        # React UI layer
-    └── components/
-        ├── layout/      # Header, Sidebar, Command Palette
-        ├── trading/     # Chart, Order Book, Positions
-        ├── algo/        # Backtest Studio
-        ├── analytics/   # Risk Dashboard
-        └── system/      # System Logs
+└── presentation/ # React UI layer
+└── components/
+├── layout/ # Header, Sidebar, Command Palette
+├── trading/ # Chart, Order Book, Positions
+├── algo/ # Backtest Studio
+├── analytics/ # Risk Dashboard
+└── system/ # System Logs
 
 See `docs/adr/` for architectural decisions.
 
@@ -91,6 +99,7 @@ See `docs/adr/` for architectural decisions.
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 22+
 - npm 10+
 
@@ -100,3 +109,8 @@ See `docs/adr/` for architectural decisions.
 git clone https://github.com/YOUR_USERNAME/apex-terminal.git
 cd apex-terminal
 npm install
+
+Log in with:
+Email: principal@apexpulse.io
+Password: apex123
+```
